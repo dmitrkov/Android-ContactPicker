@@ -32,8 +32,11 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupViewHolder> {
 
     private List<? extends Group> mGroups;
 
-    public GroupAdapter(List<? extends Group> groups) {
+    final private boolean mMultiSelect;
+
+    public GroupAdapter(List<? extends Group> groups, boolean multiSelect) {
         mGroups = groups;
+        mMultiSelect = multiSelect;
     }
 
     public void setData(List<? extends Group> groups) {
@@ -48,7 +51,7 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupViewHolder> {
         }
 
         View view = mInflater.inflate(R.layout.cp_group_list_item, parent, false);
-        return new GroupViewHolder(view);
+        return new GroupViewHolder(view, mMultiSelect);
     }
 
     @Override

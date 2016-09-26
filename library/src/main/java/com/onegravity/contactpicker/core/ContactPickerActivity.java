@@ -26,6 +26,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -39,10 +40,12 @@ import com.onegravity.contactpicker.OnContactCheckedListener;
 import com.onegravity.contactpicker.R;
 import com.onegravity.contactpicker.contact.Contact;
 import com.onegravity.contactpicker.contact.ContactDescription;
+import com.onegravity.contactpicker.contact.ContactFragment;
 import com.onegravity.contactpicker.contact.ContactSelectionChanged;
 import com.onegravity.contactpicker.contact.ContactSortOrder;
 import com.onegravity.contactpicker.contact.ContactsLoaded;
 import com.onegravity.contactpicker.group.Group;
+import com.onegravity.contactpicker.group.GroupFragment;
 import com.onegravity.contactpicker.group.GroupsLoaded;
 import com.onegravity.contactpicker.picture.ContactPictureType;
 
@@ -132,6 +135,11 @@ public class ContactPickerActivity extends AppCompatActivity implements
      */
     public static final String EXTRA_CONTACT_SORT_ORDER = "EXTRA_CONTACT_SORT_ORDER";
 
+    //kdv
+    public static final String EXTRA_CONTACT_SHOW = "EXTRA_CONTACT_SHOW";
+    public static final String EXTRA_GROUP_SHOW = "EXTRA_GROUP_SHOW";
+    public static final String EXTRA_MULTISELECT = "EXTRA_MULTISELECT";
+
     /**
      * We put the resulting contact list into the Intent as extra data with this key.
      */
@@ -167,6 +175,8 @@ public class ContactPickerActivity extends AppCompatActivity implements
 
     private static final String GROUP_IDS = "GROUP_IDS";
     private HashSet<Long> mSelectedGroupIds = new HashSet<>();
+
+    private boolean mMultiSelect;
 
     // ****************************************** Lifecycle Methods *******************************************
 
@@ -237,39 +247,82 @@ public class ContactPickerActivity extends AppCompatActivity implements
         enumName = intent.getStringExtra(EXTRA_CONTACT_SORT_ORDER);
         mSortOrder = ContactSortOrder.lookup(enumName);
 
+        //kdv
+        boolean showContscts = intent.getBooleanExtra(EXTRA_CONTACT_SHOW, true);
+        boolean showGroups = intent.getBooleanExtra(EXTRA_GROUP_SHOW, true);
+        mMultiSelect = intent.getBooleanExtra(EXTRA_MULTISELECT, true);
+
+
         setTheme(mThemeResId);
-        setContentView(R.layout.cp_contact_tab_layout);
 
-        // initialize TabLayout
-        TabLayout tabLayout = (TabLayout)findViewById(R.id.tabContent);
-        tabLayout.setTabMode(TabLayout.MODE_FIXED);
-        tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
+        if (showContscts && showGroups) {
+            setContentView(R.layout.cp_contact_tab_layout);
 
-        TabLayout.Tab tabContacts = tabLayout.newTab();
-        tabContacts.setText(R.string.cp_contact_tab_title);
-        tabLayout.addTab(tabContacts);
+            // initialize TabLayout
+            TabLayout tabLayout = (TabLayout) findViewById(R.id.tabContent);
+            tabLayout.setTabMode(TabLayout.MODE_FIXED);
+            tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
-        TabLayout.Tab tabGroups = tabLayout.newTab();
-        tabGroups.setText(R.string.cp_group_tab_title);
-        tabLayout.addTab(tabGroups);
+            TabLayout.Tab tabContacts = tabLayout.newTab();
+            tabContacts.setText(R.string.cp_contact_tab_title);
+            tabLayout.addTab(tabContacts);
 
-        // initialize ViewPager
-        final ViewPager viewPager = (ViewPager) findViewById(R.id.tabPager);
-        mAdapter = new PagerAdapter(getSupportFragmentManager(), tabLayout.getTabCount(),
-                                    mSortOrder, mBadgeType, mDescription, mDescriptionType);
-        viewPager.setAdapter(mAdapter);
-        viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+            TabLayout.Tab tabGroups = tabLayout.newTab();
+            tabGroups.setText(R.string.cp_group_tab_title);
+            tabLayout.addTab(tabGroups);
 
-        tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                viewPager.setCurrentItem(tab.getPosition());
-            }
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {}
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {}
-        });
+
+            // initialize ViewPager
+            final ViewPager viewPager = (ViewPager) findViewById(R.id.tabPager);
+            mAdapter = new PagerAdapter(getSupportFragmentManager(), tabLayout.getTabCount(),
+                    mSortOrder, mBadgeType, mDescription, mDescriptionType);
+            viewPager.setAdapter(mAdapter);
+            viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+
+            tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+                @Override
+                public void onTabSelected(TabLayout.Tab tab) {
+                    viewPager.setCurrentItem(tab.getPosition());
+                }
+
+                @Override
+                public void onTabUnselected(TabLayout.Tab tab) {
+                }
+
+                @Override
+                public void onTabReselected(TabLayout.Tab tab) {
+                }
+            });
+        }
+
+        if (showGroups) {
+
+            setContentView(R.layout.cp_contact_layout);
+
+            GroupFragment groupFragment = GroupFragment.newInstance(mMultiSelect);
+
+            // Добавление фрагмента в FrameLayout
+            FragmentTransaction transaction =
+                    getSupportFragmentManager().beginTransaction();
+            transaction.add(R.id.cpFragmentContainer, groupFragment);
+            transaction.commit();
+
+        }
+
+        if (showContscts) {
+
+            setContentView(R.layout.cp_contact_layout);
+
+            ContactFragment contactFragment = ContactFragment.newInstance(mSortOrder, mBadgeType, mDescription, mDescriptionType, mMultiSelect);
+
+            // Добавление фрагмента в FrameLayout
+            FragmentTransaction transaction =
+                    getSupportFragmentManager().beginTransaction();
+            transaction.add(R.id.cpFragmentContainer, contactFragment);
+            transaction.commit();
+
+        }
+
     }
 
     @Override
@@ -328,7 +381,12 @@ public class ContactPickerActivity extends AppCompatActivity implements
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.cp_contact_picker, menu);
+
+        //kdv
+        if(mMultiSelect)
+            getMenuInflater().inflate(R.menu.cp_contact_picker, menu);
+        else
+            getMenuInflater().inflate(R.menu.contact_picker, menu);
         return true;
     }
 

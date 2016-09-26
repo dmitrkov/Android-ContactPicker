@@ -47,6 +47,18 @@ public class GroupFragment extends BaseFragment {
 
     private GroupAdapter mAdapter;
 
+    private boolean mMultiSelect;
+
+
+    //kdv
+    public static GroupFragment newInstance(boolean multiSelect) {
+        Bundle args = new Bundle();
+        args.putBoolean("multiSelect", multiSelect);
+        GroupFragment fragment = new GroupFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     public static GroupFragment newInstance() {
         return new GroupFragment();
     }
@@ -54,8 +66,18 @@ public class GroupFragment extends BaseFragment {
     public GroupFragment() {}
 
     @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        //kdv
+        Bundle args = getArguments();
+        mMultiSelect = args.getBoolean("multiSelect", true);
+    }
+
+    @Override
     public final View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        mAdapter = new GroupAdapter(null);
+
+        mAdapter = new GroupAdapter(null, mMultiSelect);
+
         return super.createView(inflater, R.layout.cp_group_list, mAdapter, mGroups);
     }
 

@@ -42,9 +42,10 @@ public class ContactViewHolder extends RecyclerView.ViewHolder {
     final private ContactDescription mContactDescription;
     final private int mContactDescriptionType;
     final private ContactPictureManager mContactPictureLoader;
+    final private boolean mMultiSelect;
 
     ContactViewHolder(View root, ContactPictureManager contactPictureLoader, ContactPictureType contactPictureType,
-                      ContactDescription contactDescription, int contactDescriptionType) {
+                      ContactDescription contactDescription, int contactDescriptionType, boolean multiSelect) {
         super(root);
 
         mRoot = root;
@@ -59,6 +60,8 @@ public class ContactViewHolder extends RecyclerView.ViewHolder {
         mContactPictureLoader = contactPictureLoader;
 
         mBadge.setBadgeType(mContactPictureType);
+
+        mMultiSelect = multiSelect;
     }
 
     void bind(final Contact contact) {
@@ -102,6 +105,10 @@ public class ContactViewHolder extends RecyclerView.ViewHolder {
                 mBadge.assignContactUri(contactUri);
             }
         }
+
+        //kdv
+        if (!mMultiSelect)
+            mSelect.setVisibility(View.GONE);
 
         // check box
         mSelect.setOnCheckedChangeListener(null);

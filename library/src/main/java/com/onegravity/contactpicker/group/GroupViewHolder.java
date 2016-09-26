@@ -35,13 +35,17 @@ public class GroupViewHolder extends RecyclerView.ViewHolder {
     private TextView mName;
     private TextView mDescription;
 
-    GroupViewHolder(View root) {
+    final private boolean mMultiSelect;
+
+    GroupViewHolder(View root, boolean multiSelect) {
         super(root);
 
         mRoot = root;
         mSelect = (CheckBox) root.findViewById(R.id.select);
         mName = (TextView) root.findViewById(R.id.name);
         mDescription = (TextView) root.findViewById(R.id.description);
+
+        mMultiSelect = multiSelect;
     }
 
     void bind(final Group group) {
@@ -60,6 +64,10 @@ public class GroupViewHolder extends RecyclerView.ViewHolder {
         Resources res = mRoot.getContext().getResources();
         String desc = res.getQuantityString(R.plurals.cp_group_description, contacts.size(), contacts.size());
         mDescription.setText(desc);
+
+        //kdv
+        if (!mMultiSelect)
+            mSelect.setVisibility(View.GONE);
 
         // check box
         mSelect.setOnCheckedChangeListener(null);

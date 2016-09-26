@@ -48,4 +48,3 @@ dependencies {
 }
 
 apply from: '../android-artifacts.gradle'
-apply from: '../central-publish.gradle'

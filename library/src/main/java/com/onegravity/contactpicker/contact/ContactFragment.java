@@ -42,6 +42,7 @@ public class ContactFragment extends BaseFragment {
     private ContactPictureType mPictureType;
     private ContactDescription mDescription;
     private int mDescriptionType;
+    private boolean mMultiSelect;
 
     /**
      * The list of all contacts.
@@ -56,6 +57,22 @@ public class ContactFragment extends BaseFragment {
     private List<? extends Contact> mFilteredContacts = new ArrayList<>();
 
     private ContactAdapter mAdapter;
+
+    //kdv
+    public static ContactFragment newInstance(ContactSortOrder sortOrder,
+                                              ContactPictureType pictureType,
+                                              ContactDescription contactDescription,
+                                              int descriptionType, boolean multiSelect) {
+        Bundle args = new Bundle();
+        args.putString("sortOrder", sortOrder.name());
+        args.putString("pictureType", pictureType.name());
+        args.putString("contactDescription", contactDescription.name());
+        args.putInt("descriptionType", descriptionType);
+        args.putBoolean("multiSelect", multiSelect);
+        ContactFragment fragment = new ContactFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
 
     public static ContactFragment newInstance(ContactSortOrder sortOrder,
                                               ContactPictureType pictureType,
@@ -82,11 +99,13 @@ public class ContactFragment extends BaseFragment {
         mPictureType = ContactPictureType.lookup( args.getString("pictureType") );
         mDescription = ContactDescription.lookup( args.getString("contactDescription") );
         mDescriptionType = args.getInt("descriptionType");
+        //kdv
+        mMultiSelect = args.getBoolean("multiSelect", true);
     }
 
     @Override
     public final View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        mAdapter = new ContactAdapter(getContext(), null, mSortOrder, mPictureType, mDescription, mDescriptionType);
+        mAdapter = new ContactAdapter(getContext(), null, mSortOrder, mPictureType, mDescription, mDescriptionType, mMultiSelect);
 
         View rootLayout = super.createView(inflater, R.layout.cp_contact_list, mAdapter, mContacts);
 
