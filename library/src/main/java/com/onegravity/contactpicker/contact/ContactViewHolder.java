@@ -44,8 +44,11 @@ public class ContactViewHolder extends RecyclerView.ViewHolder {
     final private ContactPictureManager mContactPictureLoader;
     final private boolean mMultiSelect;
 
+    final private ContactAdapter.ContactClickListener clickListener;
+    private Contact mContact;
+
     ContactViewHolder(View root, ContactPictureManager contactPictureLoader, ContactPictureType contactPictureType,
-                      ContactDescription contactDescription, int contactDescriptionType, boolean multiSelect) {
+                      ContactDescription contactDescription, int contactDescriptionType, boolean multiSelect, ContactAdapter.ContactClickListener contactClickListener) {
         super(root);
 
         mRoot = root;
@@ -62,16 +65,37 @@ public class ContactViewHolder extends RecyclerView.ViewHolder {
         mBadge.setBadgeType(mContactPictureType);
 
         mMultiSelect = multiSelect;
+
+        this.clickListener = contactClickListener;
     }
 
     void bind(final Contact contact) {
-        mRoot.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mSelect.toggle();
-            }
-        });
 
+        if (mMultiSelect) {
+            mRoot.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mSelect.toggle();
+                }
+            });
+
+            // check box
+            mSelect.setOnCheckedChangeListener(null);
+            mSelect.setChecked(contact.isChecked());
+            mSelect.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    contact.setChecked(isChecked, false);
+                }
+            });
+
+        }else
+        {
+            mContact = contact;
+
+            mSelect.setVisibility(View.GONE);
+            mRoot.setOnClickListener(contactSelectListener);
+        }
         // main text / title
         mName.setText(contact.getDisplayName());
 
@@ -106,20 +130,15 @@ public class ContactViewHolder extends RecyclerView.ViewHolder {
             }
         }
 
-        //kdv
-        if (!mMultiSelect)
-            mSelect.setVisibility(View.GONE);
-
-        // check box
-        mSelect.setOnCheckedChangeListener(null);
-        mSelect.setChecked( contact.isChecked() );
-        mSelect.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                contact.setChecked(isChecked, false);
-            }
-        });
     }
+
+    private final View.OnClickListener contactSelectListener =
+            new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    clickListener.onClick(mContact);
+                }
+            };
 
     void onRecycled() {
         mBadge.onDestroy();

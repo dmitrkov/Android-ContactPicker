@@ -36,8 +36,17 @@ public class GroupViewHolder extends RecyclerView.ViewHolder {
     private TextView mDescription;
 
     final private boolean mMultiSelect;
+    final private GroupAdapter.GroupClickListener clickListener;
+    private Group mGroup;
 
-    GroupViewHolder(View root, boolean multiSelect) {
+    //kdv
+    interface GroupViewHolderListener {
+
+        void onGroupSelect();
+
+    }
+
+    GroupViewHolder(View root, boolean multiSelect, GroupAdapter.GroupClickListener groupClickListener) {
         super(root);
 
         mRoot = root;
@@ -46,16 +55,35 @@ public class GroupViewHolder extends RecyclerView.ViewHolder {
         mDescription = (TextView) root.findViewById(R.id.description);
 
         mMultiSelect = multiSelect;
+        clickListener = groupClickListener;
     }
 
     void bind(final Group group) {
-        mRoot.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mSelect.toggle();
-            }
-        });
 
+        if (mMultiSelect) {
+            mRoot.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mSelect.toggle();
+                }
+            });
+
+            // check box
+            mSelect.setOnCheckedChangeListener(null);
+            mSelect.setChecked(group.isChecked());
+            mSelect.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    group.setChecked(isChecked, false);
+                }
+            });
+
+        }else
+        {
+            mGroup = group;
+            mSelect.setVisibility(View.GONE);
+            mRoot.setOnClickListener(groupSelectListener);
+        }
         // main text / title
         mName.setText(group.getDisplayName());
 
@@ -65,20 +93,14 @@ public class GroupViewHolder extends RecyclerView.ViewHolder {
         String desc = res.getQuantityString(R.plurals.cp_group_description, contacts.size(), contacts.size());
         mDescription.setText(desc);
 
-        //kdv
-        if (!mMultiSelect)
-            mSelect.setVisibility(View.GONE);
-
-        // check box
-        mSelect.setOnCheckedChangeListener(null);
-        mSelect.setChecked( group.isChecked() );
-        mSelect.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                group.setChecked(isChecked, false);
-            }
-        });
-
     }
+
+    private final View.OnClickListener groupSelectListener =
+            new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    clickListener.onClick(mGroup);
+                }
+            };
 
 }

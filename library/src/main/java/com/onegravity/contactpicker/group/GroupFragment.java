@@ -16,6 +16,7 @@
 
 package com.onegravity.contactpicker.group;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,6 +24,7 @@ import android.view.ViewGroup;
 
 import com.onegravity.contactpicker.BaseFragment;
 import com.onegravity.contactpicker.R;
+import com.onegravity.contactpicker.contact.ContactAdapter;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -49,8 +51,17 @@ public class GroupFragment extends BaseFragment {
 
     private boolean mMultiSelect;
 
+    private GroupFragmentListener listener;
+
 
     //kdv
+
+    public interface GroupFragmentListener {
+
+        void onGroupSelect(Group group);
+
+    }
+
     public static GroupFragment newInstance(boolean multiSelect) {
         Bundle args = new Bundle();
         args.putBoolean("multiSelect", multiSelect);
@@ -76,7 +87,15 @@ public class GroupFragment extends BaseFragment {
     @Override
     public final View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        mAdapter = new GroupAdapter(null, mMultiSelect);
+        mAdapter = new GroupAdapter(null,
+                mMultiSelect,
+                new GroupAdapter.GroupClickListener() {
+                    @Override
+                    public void onClick(Group group) {
+                        listener.onGroupSelect(group);
+                    }
+                }
+                );
 
         return super.createView(inflater, R.layout.cp_group_list, mAdapter, mGroups);
     }
@@ -136,4 +155,15 @@ public class GroupFragment extends BaseFragment {
         mAdapter.setData(mFilteredGroups);
     }
 
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        listener = (GroupFragmentListener) context;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        listener = null;
+    }
 }

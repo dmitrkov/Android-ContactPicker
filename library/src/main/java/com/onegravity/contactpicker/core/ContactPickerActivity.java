@@ -65,7 +65,10 @@ import java.util.Map;
 import static android.provider.ContactsContract.CommonDataKinds.StructuredPostal.FORMATTED_ADDRESS;
 
 public class ContactPickerActivity extends AppCompatActivity implements
-        LoaderManager.LoaderCallbacks<Cursor> {
+        LoaderManager.LoaderCallbacks<Cursor>
+        , GroupFragment.GroupFragmentListener
+        , ContactFragment.ContactFragmentListener
+{
 
     /**
      * Use this parameter to set the Theme for this activity.
@@ -176,7 +179,9 @@ public class ContactPickerActivity extends AppCompatActivity implements
     private static final String GROUP_IDS = "GROUP_IDS";
     private HashSet<Long> mSelectedGroupIds = new HashSet<>();
 
+    //kdv
     private boolean mMultiSelect;
+    final static public String TAG = "Contact picker";
 
     // ****************************************** Lifecycle Methods *******************************************
 
@@ -847,4 +852,24 @@ public class ContactPickerActivity extends AppCompatActivity implements
         return false;
     }
 
+    @Override
+    public void onGroupSelect(Group group){
+        Log.d(TAG, "select group " + group.getDisplayName() + " " + group.getId());
+
+        Intent data = new Intent();
+        data.putExtra(RESULT_GROUP_DATA, group);
+        setResult(Activity.RESULT_OK, data);
+        finish();
+    }
+
+    @Override
+    public void onContactSelect(Contact contact) {
+        Log.d(TAG, "select contact " + contact.getDisplayName() + " " + contact.getId());
+
+        Intent data = new Intent();
+        data.putExtra(RESULT_CONTACT_DATA, contact);
+        setResult(Activity.RESULT_OK, data);
+        finish();
+
+    }
 }

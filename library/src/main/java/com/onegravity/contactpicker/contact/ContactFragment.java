@@ -16,6 +16,7 @@
 
 package com.onegravity.contactpicker.contact;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -59,6 +60,12 @@ public class ContactFragment extends BaseFragment {
     private ContactAdapter mAdapter;
 
     //kdv
+    private ContactFragmentListener listener;
+
+    public interface ContactFragmentListener{
+        void onContactSelect(Contact contact);
+    }
+
     public static ContactFragment newInstance(ContactSortOrder sortOrder,
                                               ContactPictureType pictureType,
                                               ContactDescription contactDescription,
@@ -105,7 +112,14 @@ public class ContactFragment extends BaseFragment {
 
     @Override
     public final View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        mAdapter = new ContactAdapter(getContext(), null, mSortOrder, mPictureType, mDescription, mDescriptionType, mMultiSelect);
+        mAdapter = new ContactAdapter(
+                new ContactAdapter.ContactClickListener() {
+                    @Override
+                    public void onClick(Contact contact) {
+                        listener.onContactSelect(contact);
+                    }
+                },
+                getContext(), null, mSortOrder, mPictureType, mDescription, mDescriptionType, mMultiSelect);
 
         View rootLayout = super.createView(inflater, R.layout.cp_contact_list, mAdapter, mContacts);
 
@@ -179,4 +193,20 @@ public class ContactFragment extends BaseFragment {
         mAdapter.setData(mFilteredContacts);
     }
 
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        listener = (ContactFragmentListener) context;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        listener = null;
+    }
 }

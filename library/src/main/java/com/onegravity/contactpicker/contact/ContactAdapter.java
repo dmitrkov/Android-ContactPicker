@@ -45,11 +45,19 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactViewHolder> impl
 
     private LayoutInflater mInflater;
 
-    public ContactAdapter(Context context, List<Contact> contacts,
+    //kdv
+    final private ContactClickListener clickListener;
+
+    public interface ContactClickListener {
+        void onClick(Contact contact);
+    }
+
+    public ContactAdapter(ContactClickListener contactClickListener, Context context, List<Contact> contacts,
                           ContactSortOrder sortOrder,
                           ContactPictureType contactPictureType,
                           ContactDescription contactDescription,
-                          int contactDescriptionType, boolean multiSelect) {
+                          int contactDescriptionType,
+                          boolean multiSelect) {
         mContacts = contacts;
         mSortOrder = sortOrder;
         mContactPictureType = contactPictureType;
@@ -57,6 +65,8 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactViewHolder> impl
         mContactDescriptionType = contactDescriptionType;
         mContactPictureLoader = new ContactPictureManager(context, mContactPictureType == ContactPictureType.ROUND);
         mMultiSelect = multiSelect;
+
+        this.clickListener = contactClickListener;
     }
 
     public void setData(List<? extends Contact> contacts) {
@@ -73,7 +83,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactViewHolder> impl
 
         View view = mInflater.inflate(R.layout.cp_contact_list_item, parent, false);
         return new ContactViewHolder(view, mContactPictureLoader, mContactPictureType,
-                                     mContactDescription, mContactDescriptionType, mMultiSelect);
+                                     mContactDescription, mContactDescriptionType, mMultiSelect, clickListener);
     }
 
     @Override
