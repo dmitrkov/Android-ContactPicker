@@ -65,7 +65,7 @@ public class ContactImpl extends ContactElementImpl implements Contact {
             0xff607D8B
     };
 
-    static ContactImpl fromCursor(Cursor cursor) {
+    public static ContactImpl fromCursor(Cursor cursor) {
         long id = cursor.getLong(cursor.getColumnIndex(ContactsContract.Contacts._ID));
         String lookupKey = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.LOOKUP_KEY));
         String displayName = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME_PRIMARY));
