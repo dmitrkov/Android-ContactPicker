@@ -31,9 +31,9 @@ import java.util.Map;
  * It can be instantiated and modified only within its own package to prevent modifications from
  * classes outside the package.
  */
-class GroupImpl extends ContactElementImpl implements Group {
+public class GroupImpl extends ContactElementImpl implements Group {
 
-    static GroupImpl fromCursor(Cursor cursor) {
+    public static GroupImpl fromCursor(Cursor cursor) {
         long id = cursor.getLong(cursor.getColumnIndex(ContactsContract.Groups._ID));
         String title = cursor.getString(cursor.getColumnIndex(ContactsContract.Groups.TITLE));
         return new GroupImpl(id, title);
